@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    >
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Image Compressor</title>
+    <link rel="stylesheet" href="./assets/output.css">
+</head>
+<body>
+<div>
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="text-center display-4 my-5">Image Compressor</h1>
+            </div>
+
+            <div class="col-12 col-md-8 offset-md-2">
+                <div class="border p-5 bg-body-tertiary rounded-3" id="dropzone">
+                    <form class="d-flex flex-column align-items-center justify-content-center">
+                        <p class="text-center mb-5">
+                            Upload multiple files with the file dialog or by dragging and dropping images onto the
+                            colored
+                            region
+                        </p>
+
+                        <input
+                          class="form-control"
+                          type="file"
+                          id="fileElem"
+                          multiple
+                          accept="image/*"
+                          onchange="new DropImages().handleFiles(this.files)"
+                        >
+
+                        <label class="button visually-hidden" for="fileElem">Select some files</label>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="table-responsive">
+
+    </div>
+</div>
+</div>
+
+<script src="./assets/index.js">
+    const app = new DropImages();
+    app.init();
+</script>
+</body>
+</html>
