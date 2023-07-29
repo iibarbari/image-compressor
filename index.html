@@ -10,7 +10,7 @@
     <title>Image Compressor</title>
     <link rel="stylesheet" href="./assets/output.css">
 </head>
-<body>
+<body data-bs-theme="dark">
 <div>
     <div class="container mb-5">
         <div class="row">
@@ -46,7 +46,20 @@
 
 <div class="container">
     <div class="table-responsive">
+        <table class="table table-hover d-none">
+            <thead>
+            <tr>
+                <th scope="col">File Name</th>
+                <th scope="col">Original Size</th>
+                <th scope="col">Compressed Size</th>
+                <th scope="col">Compression Ratio</th>
+                <th scope="col">Download</th>
+            </tr>
+            </thead>
+            <tbody id="table-body">
 
+            </tbody>
+        </table>
     </div>
 </div>
 </div>
