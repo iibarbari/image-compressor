@@ -8,6 +8,9 @@ dependencies:
   bootstrap:
     specifier: ^5.3.1
     version: 5.3.1(@popperjs/core@2.11.8)
+  client-zip:
+    specifier: ^2.4.4
+    version: 2.4.4
   compressorjs:
     specifier: ^1.2.1
     version: 1.2.1
@@ -153,6 +156,10 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
+
+  /client-zip@2.4.4:
+    resolution: {integrity: sha512-Ixk40BUI7VvNDxW7SCze20GbCuC+gjP4tGkXUpo6/W96bOf96HSed6cOQVeUOIe74SJAG/dIrBr7AtR4xBVnsA==}
+    dev: false
 
   /commondir@1.0.1:
     resolution: {integrity: sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==}

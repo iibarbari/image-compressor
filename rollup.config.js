@@ -16,7 +16,10 @@ export default {
         commonjs(),
         nodeResolve(),
         scss({
-            output: 'styles.css',
+            fileName: 'styles.css',
+            outputStyle: 'compressed',
+            output: true,
+            dir: 'styles',
         }),
     ],
 };

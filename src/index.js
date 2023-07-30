@@ -1,9 +1,18 @@
 import Compressor from "compressorjs";
+import {downloadZip} from 'client-zip';
 import './styles.scss';
 
 export default class DropImages {
     constructor() {
         this.dropZone = document.querySelector('#dropzone')
+        this.downloadAllButton = document.querySelector('a#download-all')
+        this.tbody = document.querySelector('tbody#table-body')
+    }
+
+    reset() {
+        console.log('DropImages.reset()');
+        this.downloadAllButton.classList.add('d-none')
+        this.tbody.innerHTML = ''
     }
 
     preventDefaults(e) {
@@ -50,6 +59,8 @@ export default class DropImages {
 
             reader.readAsDataURL(file);
         })
+
+        await this.createBatchDownload(files)
     }
 
     byteConverter(bytes, decimals) {
@@ -60,7 +71,7 @@ export default class DropImages {
 
         let i = Math.floor(Math.log(bytes) / Math.log(K_UNIT));
 
-        return  parseFloat((bytes / Math.pow(K_UNIT, i)).toFixed(decimals)) + " " + SIZES[i];
+        return parseFloat((bytes / Math.pow(K_UNIT, i)).toFixed(decimals)) + " " + SIZES[i];
     }
 
 
@@ -103,10 +114,30 @@ export default class DropImages {
     }
 
     async handleDrop(e) {
+        this.reset();
+
         let dt = e.dataTransfer
         let files = dt.files
 
         await this.handleFiles(files)
+    }
+
+    async createBatchDownload(files) {
+        const blob = await downloadZip([...files], {
+            filename: 'images.zip',
+            progress: (index, max) => {
+                console.log(`progress: ${index} / ${max}`);
+            },
+        }).blob();
+
+        console.log(this.downloadAllButton)
+
+        this.downloadAllButton.classList.remove('d-none')
+        this.downloadAllButton.classList.add("disabled");
+        this.downloadAllButton.href = URL.createObjectURL(blob)
+        this.downloadAllButton.download = "images.zip"
+        this.downloadAllButton.innerHTML = "Download All"
+        this.downloadAllButton.classList.remove("disabled");
     }
 
 
@@ -134,9 +165,10 @@ export default class DropImages {
         })
 
         this.dropZone.addEventListener(
-            'drop', (e) => {
+            'drop', async (e) => {
                 this.preventDefaults(e)
-                this.handleDrop(e)
+
+                await this.handleDrop(e)
             },
             false
         )
@@ -144,6 +176,9 @@ export default class DropImages {
 
     init() {
         console.log('DropImages.init()');
+
+        this.reset();
+
         this.addEventListeners();
     }
 }
