@@ -28,6 +28,7 @@
                         </p>
 
                         <input
+                          aria-label="Select some files"
                           class="form-control"
                           type="file"
                           id="fileElem"
@@ -35,8 +36,6 @@
                           accept="image/*"
                           onchange="new DropImages().handleFiles(this.files)"
                         >
-
-                        <label class="button visually-hidden" for="fileElem">Select some files</label>
                     </form>
                 </div>
             </div>
@@ -49,7 +48,7 @@
         <table class="table table-hover d-none">
             <thead>
             <tr>
-                <th scope="col">File Name</th>
+                <th scope="col">File</th>
                 <th scope="col">Original Size</th>
                 <th scope="col">Compressed Size</th>
                 <th scope="col">Compression Ratio</th>
@@ -64,9 +63,6 @@
 </div>
 </div>
 
-<script src="./assets/index.js">
-    const app = new DropImages();
-    app.init();
-</script>
+<script src="./assets/index.js" />
 </body>
 </html>

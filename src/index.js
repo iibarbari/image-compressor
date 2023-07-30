@@ -1,5 +1,5 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
 import Compressor from "compressorjs";
+import './styles.scss';
 
 export default class DropImages {
     constructor() {
