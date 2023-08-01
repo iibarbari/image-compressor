@@ -1,4 +1,4 @@
-var DropImages = (function () {
+(function () {
   'use strict';
 
   /*!
@@ -1072,13 +1072,19 @@ var DropImages = (function () {
 
       reset() {
           // Hide download all button
-          this.downloadAllButtonWrapper.innerHTML = '';
+          if (this.downloadAllButtonWrapper !== null) {
+              this.downloadAllButtonWrapper.innerHTML = '';
+          }
 
           // Hide table
-          this.table.classList.add('d-none');
+          if (this.table !== null) {
+              this.table.classList.add('d-none');
+          }
 
           // Remove all rows from the table
-          this.tbody.innerHTML = '';
+          if (this.tbody !== null) {
+              this.tbody.innerHTML = '';
+          }
       }
 
       preventDefaults(e) {
@@ -1087,52 +1093,66 @@ var DropImages = (function () {
       }
 
       highlight() {
+          if (this.dropZone === null) return;
+
           this.dropZone.classList.remove('bg-body-tertiary');
           this.dropZone.classList.add('bg-body-secondary');
       }
 
       unhighlight() {
+          if (this.dropZone === null) return;
+
           this.dropZone.classList.remove('bg-body-secondary');
           this.dropZone.classList.add('bg-body-tertiary');
       }
 
-      async handleFiles(files) {
+      handleFiles(files) {
           // Reset the UI
           this.reset();
 
-          // Bind global this to a variable to use it inside the FileReader.onload callback
-          const globalThis = this;
+          const promises = [...files].map((file) => {
 
-          [...files].forEach((file) => {
-              const reader = new FileReader();
-
-              reader.onload = async (e) => {
-                  const src = e.target.result;
-
+              return new Promise(async (resolve, reject) => {
                   await new Compressor(file, {
                       quality: 0.5,
-                      success(result) {
-                          const imageURL = URL.createObjectURL(result);
+                      // success: (result) => {
+                      //     const reader = new FileReader();
+                      //
+                      //     reader.addEventListener('loadend', () => {
+                      //         // reader.result contains the contents of blob as a DataURL
+                      //         resolve(reader.result);
+                      //     });
+                      // },
 
-                          globalThis.appendRow({
-                              src,
-                              name: result.name,
-                              originalSize: file.size,
-                              compressedSize: result.size,
-                              imageURL
-                          });
-                      },
-                      error(err) {
-                          console.log(err.message);
-                      },
+                      success: resolve,
+                      error: reject,
                   });
-              };
+              }).then(async (result) => {
+                  const reader = new FileReader();
 
-              reader.readAsDataURL(file);
+                  reader.onload = async () => {
+                      const imageURL = reader.result;
+                      const originalSize = file.size;
+                      const compressedSize = result.size;
+
+                      await this.appendRow({originalSize, compressedSize, imageURL});
+                  };
+
+                  reader.readAsDataURL(result);
+
+                  return result;
+              }).catch((err) => {
+                  console.log('Compress error');
+              });
           });
 
-          this.table.classList.remove('d-none');
-          await this.createBatchDownload(files);
+          Promise.all(promises).then(async (values) => {
+              await this.createBatchDownload(values);
+          }).then(async () => {
+              if (this.table === null) return;
+
+              this.table.classList.remove('d-none');
+          });
       }
 
       byteConverter(bytes, decimals) {
@@ -1146,17 +1166,18 @@ var DropImages = (function () {
           return parseFloat((bytes / Math.pow(K_UNIT, i)).toFixed(decimals)) + " " + SIZES[i];
       }
 
+      appendRow({originalSize, compressedSize, imageURL}) {
+          if (this.tbody === null) return;
 
-      async appendRow({src, name, originalSize, compressedSize, imageURL}) {
           const table = document.querySelector('table.table');
           table.classList.remove('d-none');
-          const tbody = document.querySelector('tbody#table-body');
+          document.querySelector('tbody#table-body');
           const row = document.createElement('tr');
 
           const td1 = document.createElement('td');
           td1.classList.add('align-middle');
           const img = document.createElement("img");
-          img.src = src;
+          img.src = imageURL;
           img.classList.add('img-thumbnail');
           img.width = 100;
           td1.appendChild(img);
@@ -1182,18 +1203,24 @@ var DropImages = (function () {
           td5.innerHTML = '<a href="' + imageURL + '" download="' + "image" + '" class="btn btn-primary">Download</a>';
           row.appendChild(td5);
 
-          tbody.appendChild(row);
+          this.tbody.appendChild(row);
       }
 
-      async handleDrop(e) {
+      handleDrop(e) {
           let dt = e.dataTransfer;
           let files = dt.files;
 
-          await this.handleFiles(files);
+          this.handleFiles(files);
       }
 
       async createBatchDownload(files) {
-          const blob = await A([...files], {
+          const hydratedFiles = [...files].map((file) => {
+              return new File([file], file.name, {type: file.type})
+          });
+
+          console.log("createBatchDownload", hydratedFiles);
+
+          const blob = await A(hydratedFiles, {
               filename: 'images.zip',
               progress: (index, max) => {
                   console.log(`progress: ${index} / ${max}`);
@@ -1211,7 +1238,11 @@ var DropImages = (function () {
       }
 
       addEventListeners() {
+          if (this.dropZone === null) return;
+
           ['dragenter', 'dragover'].forEach((eventName) => {
+              if (this.dropZone === null) return;
+
               this.dropZone.addEventListener(
                   eventName,
                   (e) => {
@@ -1223,6 +1254,8 @@ var DropImages = (function () {
           });
 
           ['dragleave', 'drop'].forEach(eventName => {
+              if (this.dropZone === null) return;
+
               this.dropZone.addEventListener(
                   eventName,
                   (e) => {
@@ -1254,6 +1287,19 @@ var DropImages = (function () {
 
   window.DropImages = DropImages;
 
-  return DropImages;
+  function updateTheme(mediaMatch) {
+      if (mediaMatch.matches) {
+          document.body.setAttribute("data-bs-theme", "dark");
+      } else {
+          document.body.setAttribute("data-bs-theme", "light");
+      }
+  }
+
+  // Set the theme based on the user's preference
+  if (window.matchMedia) {
+      updateTheme(window.matchMedia('(prefers-color-scheme: dark)'));
+
+      window.matchMedia('(prefers-color-scheme: dark)').addListener(updateTheme);
+  }
 
 })();
