@@ -3,15 +3,26 @@ import {downloadZip} from 'client-zip';
 import './styles.scss';
 
 export default class DropImages {
-    constructor() {
-        this.dropZone = document.querySelector('#dropzone')
-        this.downloadAllButton = document.querySelector('a#download-all')
-        this.tbody = document.querySelector('tbody#table-body')
+    constructor(
+        dropZone = document.querySelector('#dropzone'),
+        downloadAllButtonWrapper = document.querySelector('div#download-all-wrapper'),
+        table = document.querySelector('table.table'),
+        tbody = document.querySelector('tbody#table-body')
+    ) {
+        this.dropZone = dropZone;
+        this.downloadAllButtonWrapper = downloadAllButtonWrapper;
+        this.table = table;
+        this.tbody = tbody;
     }
 
     reset() {
-        console.log('DropImages.reset()');
-        this.downloadAllButton.classList.add('d-none')
+        // Hide download all button
+        this.downloadAllButtonWrapper.innerHTML = '';
+
+        // Hide table
+        this.table.classList.add('d-none')
+
+        // Remove all rows from the table
         this.tbody.innerHTML = ''
     }
 
@@ -31,6 +42,12 @@ export default class DropImages {
     }
 
     async handleFiles(files) {
+        // Reset the UI
+        this.reset();
+
+        // Bind global this to a variable to use it inside the FileReader.onload callback
+        const globalThis = this;
+
         [...files].forEach((file) => {
             const reader = new FileReader();
 
@@ -38,12 +55,11 @@ export default class DropImages {
                 const src = e.target.result;
 
                 await new Compressor(file, {
-                    quality: 0.8,
-                    maxWidth: 800,
+                    quality: 0.5,
                     success(result) {
                         const imageURL = URL.createObjectURL(result)
 
-                        dropImages.appendRow({
+                        globalThis.appendRow({
                             src,
                             name: result.name,
                             originalSize: file.size,
@@ -60,6 +76,7 @@ export default class DropImages {
             reader.readAsDataURL(file);
         })
 
+        this.table.classList.remove('d-none');
         await this.createBatchDownload(files)
     }
 
@@ -114,8 +131,6 @@ export default class DropImages {
     }
 
     async handleDrop(e) {
-        this.reset();
-
         let dt = e.dataTransfer
         let files = dt.files
 
@@ -130,16 +145,15 @@ export default class DropImages {
             },
         }).blob();
 
-        console.log(this.downloadAllButton)
+        const downloadAllButton = document.createElement('a');
 
-        this.downloadAllButton.classList.remove('d-none')
-        this.downloadAllButton.classList.add("disabled");
-        this.downloadAllButton.href = URL.createObjectURL(blob)
-        this.downloadAllButton.download = "images.zip"
-        this.downloadAllButton.innerHTML = "Download All"
-        this.downloadAllButton.classList.remove("disabled");
+        downloadAllButton.href = URL.createObjectURL(blob)
+        downloadAllButton.download = "images.zip"
+        downloadAllButton.innerHTML = "Download All"
+        downloadAllButton.classList.add("btn", "btn-primary", "mt-3");
+
+        this.downloadAllButtonWrapper.appendChild(downloadAllButton);
     }
-
 
     addEventListeners() {
         ['dragenter', 'dragover'].forEach((eventName) => {
@@ -175,13 +189,12 @@ export default class DropImages {
     }
 
     init() {
-        console.log('DropImages.init()');
-
+        // Reset the UI
         this.reset();
 
+        // Add event listeners
         this.addEventListeners();
     }
 }
 
-const dropImages = new DropImages();
-dropImages.init();
+window.DropImages = DropImages;
