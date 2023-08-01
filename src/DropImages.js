@@ -57,7 +57,9 @@ export default class DropImages {
         const promises = [...files].map((file) => {
             return new Promise(async (resolve, reject) => {
                 await new Compressor(file, {
-                    quality: 0.5,
+                    quality: 0.8,
+                    maxWidth: 1200,
+                    maxHeight: 1200,
                     success: resolve,
                     error: reject,
                 });

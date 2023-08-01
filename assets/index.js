@@ -1111,19 +1111,11 @@
           this.reset();
 
           const promises = [...files].map((file) => {
-
               return new Promise(async (resolve, reject) => {
                   await new Compressor(file, {
-                      quality: 0.5,
-                      // success: (result) => {
-                      //     const reader = new FileReader();
-                      //
-                      //     reader.addEventListener('loadend', () => {
-                      //         // reader.result contains the contents of blob as a DataURL
-                      //         resolve(reader.result);
-                      //     });
-                      // },
-
+                      quality: 0.8,
+                      maxWidth: 1200,
+                      maxHeight: 1200,
                       success: resolve,
                       error: reject,
                   });
@@ -1142,7 +1134,7 @@
 
                   return result;
               }).catch((err) => {
-                  console.log('Compress error');
+                  console.log('Compress error', err);
               });
           });
 
@@ -1171,7 +1163,6 @@
 
           const table = document.querySelector('table.table');
           table.classList.remove('d-none');
-          document.querySelector('tbody#table-body');
           const row = document.createElement('tr');
 
           const td1 = document.createElement('td');
@@ -1218,14 +1209,7 @@
               return new File([file], file.name, {type: file.type})
           });
 
-          console.log("createBatchDownload", hydratedFiles);
-
-          const blob = await A(hydratedFiles, {
-              filename: 'images.zip',
-              progress: (index, max) => {
-                  console.log(`progress: ${index} / ${max}`);
-              },
-          }).blob();
+          const blob = await A(hydratedFiles).blob();
 
           const downloadAllButton = document.createElement('a');
 
